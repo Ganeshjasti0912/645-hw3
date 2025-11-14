@@ -1,0 +1,209 @@
+<!-- Ganesh Jasti -->
+<!-- CS Department Survey Connected to FastAPI -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CS Department Survey</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    h1 { color: #006633; }
+    .header-box {
+      border: 5px solid #006633;
+      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      text-align: center;
+      background-color: #FFCC33;
+      color: #006633;
+    }
+    .required:after { content: " *"; color: red; }
+    .btn-success { background-color: #FFCC33; color: #006633; border-color: #006633; }
+    #statusMessage { text-align: center; margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container header-box">
+    <h1>CS Department Survey</h1>
+  </div>
+
+  <div class="container mt-4">
+    <form id="surveyForm" autocomplete="on">
+      <!-- Personal Info -->
+      <div class="row mb-3">
+        <div class="col">
+          <label class="form-label required">First Name</label>
+          <input type="text" name="first_name" class="form-control" required>
+        </div>
+        <div class="col">
+          <label class="form-label required">Last Name</label>
+          <input type="text" name="last_name" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label required">Street Address</label>
+        <input type="text" name="street" class="form-control" required>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col">
+          <label class="form-label required">City</label>
+          <input type="text" name="city" class="form-control" required>
+        </div>
+        <div class="col">
+          <label class="form-label required">State</label>
+          <input type="text" name="state" class="form-control" required>
+        </div>
+        <div class="col">
+          <label class="form-label required">ZIP Code</label>
+          <input type="text" name="zip" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label required">Telephone</label>
+        <input type="tel" name="phone" class="form-control" required placeholder="123-456-7890">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label required">Email</label>
+        <input type="email" name="email" class="form-control" required placeholder="example@gmu.edu">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label required">Date of Survey</label>
+        <input type="date" name="survey_date" class="form-control" required>
+      </div>
+
+      <!-- Campus Likes -->
+      <div class="mb-3">
+        <label class="form-label">What did you like most about the campus?</label><br>
+        <div class="form-check"><input class="form-check-input" type="checkbox" value="Students" name="liked_most"><label class="form-check-label">Students</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" value="Location" name="liked_most"><label class="form-check-label">Location</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" value="Campus" name="liked_most"><label class="form-check-label">Campus</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" value="Atmosphere" name="liked_most"><label class="form-check-label">Atmosphere</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" value="Dorm Rooms" name="liked_most"><label class="form-check-label">Dorm Rooms</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" value="Sports" name="liked_most"><label class="form-check-label">Sports</label></div>
+      </div>
+
+      <!-- Interest -->
+      <div class="mb-3">
+        <label class="form-label">How did you become interested in the university?</label><br>
+        <div class="form-check"><input class="form-check-input" type="radio" name="interest_source" value="Friends"><label class="form-check-label">Friends</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="interest_source" value="Television"><label class="form-check-label">Television</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="interest_source" value="Internet"><label class="form-check-label">Internet</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="interest_source" value="Other"><label class="form-check-label">Other</label></div>
+      </div>
+
+      <!-- Recommendation -->
+      <div class="mb-3">
+        <label class="form-label">Likelihood of Recommending This School</label>
+        <select name="recommendation" class="form-select" >
+          <option value="">-- Select an option --</option>
+          <option value="Very Likely">Very Likely</option>
+          <option value="Likely">Likely</option>
+          <option value="Unlikely">Unlikely</option>
+        </select>
+      </div>
+
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-success">Submit</button>
+        <button type="button" class="btn btn-danger" onclick="window.location.href='index.html'">Cancel</button>
+      </div>
+    </form>
+
+    <div id="statusMessage"></div>
+  </div>
+
+  <script>
+  const API_URL = "http://98.89.70.148:31192/surveys";
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const surveyId = urlParams.get("id");
+
+  const form = document.getElementById("surveyForm");
+  const statusDiv = document.getElementById("statusMessage");
+
+  // --- If editing, fetch existing survey ---
+  if (surveyId) {
+    document.querySelector("h1").innerText = "Edit CS Department Survey";
+    loadSurveyData(surveyId);
+  }
+
+  async function loadSurveyData(id) {
+    try {
+      const res = await fetch(`${API_URL}/${id}`);
+      const data = await res.json();
+
+      // Fill form fields with data
+      for (const key in data) {
+        const input = form.querySelector(`[name="${key}"]`);
+        if (input) input.value = data[key];
+      }
+
+      // Handle checkboxes for liked_most
+      if (data.liked_most) {
+        const likes = data.liked_most.split(",").map(v => v.trim());
+        document.querySelectorAll('input[name="likes"]').forEach(cb => {
+          cb.checked = likes.includes(cb.value);
+        });
+      }
+
+     // Handle radio buttons for interest_source (case-insensitive + trim fix)
+if (data.interest_source) {
+  const interestValue = data.interest_source.trim().toLowerCase();
+  document.querySelectorAll('input[name="interest_source"]').forEach(radio => {
+    if (radio.value.trim().toLowerCase() === interestValue) {
+      radio.checked = true;
+    }
+  });
+}
+
+
+
+      document.getElementById("recommendation").value = data.recommendation;
+    } catch (error) {
+      console.error("Error loading survey:", error);
+    }
+  }
+
+  // --- Handle Submit (POST or PUT) ---
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const likedMostValues = Array.from(
+      document.querySelectorAll('input[name="likes"]:checked')
+    ).map(cb => cb.value).join(", ");
+
+    const formData = Object.fromEntries(new FormData(form).entries());
+    formData.liked_most = likedMostValues;
+
+    try {
+      const method = surveyId ? "PUT" : "POST";
+      const url = surveyId ? `${API_URL}/${surveyId}` : API_URL;
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        statusDiv.innerHTML = `<p class="text-success">✅ Survey ${surveyId ? "updated" : "submitted"} successfully!</p>`;
+        setTimeout(() => (window.location.href = "view_surveys.html"), 1200);
+      } else {
+        const err = await res.text();
+        statusDiv.innerHTML = `<p class="text-danger">❌ Submission failed: ${err}</p>`;
+      }
+    } catch (error) {
+      statusDiv.innerHTML = `<p class="text-warning">⚠️ Could not connect to backend: ${error.message}</p>`;
+    }
+  });
+</script>
+
+</body>
+</html>
