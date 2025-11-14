@@ -55,10 +55,11 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    kubectl apply -f k8s/backend-deployment.yaml
-                    kubectl apply -f k8s/backend-service.yaml
-                    kubectl apply -f k8s/frontend-deployment.yaml
-                    kubectl apply -f k8s/frontend-service.yaml
+                    kubectl apply --validate=false --insecure-skip-tls-verify=true -f k8s/backend-deployment.yaml
+                    kubectl apply --validate=false --insecure-skip-tls-verify=true -f k8s/backend-service.yaml
+                    kubectl apply --validate=false --insecure-skip-tls-verify=true -f k8s/frontend-deployment.yaml
+                    kubectl apply --validate=false --insecure-skip-tls-verify=true -f k8s/frontend-service.yaml
+
                     '''
                 }
             }
