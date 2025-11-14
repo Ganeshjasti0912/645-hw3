@@ -20,7 +20,8 @@ pipeline {
                 script {
                     sh '''
                     cd backend
-                    docker build -t $BACKEND_IMAGE:latest .
+                    docker build --no-cache -t $BACKEND_IMAGE:latest .
+
                     '''
                 }
             }
@@ -31,7 +32,8 @@ pipeline {
                 script {
                     sh '''
                     cd frontend
-                    docker build -t $FRONTEND_IMAGE:latest .
+                    docker build --no-cache -t ganesh0912/hw3-frontend:latest .
+
                     '''
                 }
             }
