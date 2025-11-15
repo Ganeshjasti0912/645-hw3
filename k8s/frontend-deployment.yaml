@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ganesh0912/hw3-frontend:latest
+        image: ganesh0912/hw3-frontend:v3
         imagePullPolicy: Always
 
         ports:
